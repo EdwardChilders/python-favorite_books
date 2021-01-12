@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viewed Book</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div id="header">
+    <h1>Welcome {{ user.first_name }}</h1>
+    <div class="links">
+      <a href="/books">Home</a>
+      <a href="/logout">Log Out</a>
+    </div>
+  </div>
+  
+  {% if user == book.uploaded_by_id_one %}
+    <form action="/update_book/{{ book.id }}" method='POST'>
+      {% csrf_token %}
+      <input type="text" name="title" value="{{ book.title }}">
+      <p>Added by: {{ book.uploaded_by_id_one.first_name }} {{ book.uploaded_by_id_one.last_name }}</p>
+      <p>Added on: {{ book.created_at }}</p>
+      <p>Last updated on: {{ book.updated_at }}</p>
+      <p>Description <textarea name="description" id="description" cols="30" rows="7">{{ book.desc }}</textarea></p>
+      <a href="/update_book/{{ book.id }}"><button type='submit'>Update</button></a>
+    </form>
+    <a href="/delete_book/{{ book.id }}"><button type='submit'>Delete</button></a>
+  {% else %}
+    <h3>{{ book.title }}</h3>
+    <p>Added by: {{ book.uploaded_by_id_one.first_name }} {{ book.uploaded_by_id_one.last_name }}</p>
+    <p>Added on: {{ book.created_at }}</p>
+    <p>Last updated on: {{ book.updated_at }}</p>
+    <p>Description: {{ book.desc }}</p>
+  {% endif %}
+
+  <h3>Users Who Like This Book:</h3>
+  <ul>
+    {% for fav_user in book.favorites_by_many.all %}
+      {% if user == fav_user %}
+      <li>{{ fav_user.first_name }} {{ fav_user.last_name }} <a href="/remove_favorite/{{ book.id }}">Un-Favorite</a></li>
+      {% else %}
+      <li>{{ fav_user.first_name }} {{ fav_user.last_name }}</li>
+      {% endif %}
+    {% endfor %}
+
+    {% if user not in book.favorites_by_many.all %}
+    <a href="/add_favorite/{{ book.id }}">Add to Favorites</a>
+    {% endif %}
+  </ul>
+</body>
+</html>
